@@ -36,7 +36,7 @@ python -m http.server 8080
 仓库已经包含 GitHub Actions 工作流：.github/workflows/deploy.yml。
 
 1. 打开仓库 **Settings → Pages**。
-2. 在 **Build and deployment → Source** 中选择 **GitHub Actions**。
+2. 在 **Build and deployment → Source** 中选择 **GitHub Actions**。首次启用需要仓库管理员手动完成这一步；GitHub Actions 的仓库令牌无法替仓库创建 Pages 站点。
 3. 推送到 main 分支，或在 Actions 页面手动运行 **Deploy Python Quest to GitHub Pages**。
 4. 等待工作流成功后，通过 GitHub Pages 给出的地址访问网站。
 
