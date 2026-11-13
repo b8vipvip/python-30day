@@ -130,8 +130,8 @@ window.QuestChallenges = [
     hint: "定义 async 函数，使用 asyncio.gather 并发调用子协程，返回加上 ✓ 的名字列表。",
     starter: "import asyncio\n\nasync def scout_all(names):\n    raise NotImplementedError",
     tests: [
-      ["多个目标", "import asyncio\nassert asyncio.run(scout_all(['北岛','南岛'])) == ['北岛 ✓','南岛 ✓']"],
-      ["空目标", "import asyncio\nassert asyncio.run(scout_all([])) == []"],
+      ["多个目标", "assert await scout_all(['北岛','南岛']) == ['北岛 ✓','南岛 ✓']"],
+      ["空目标", "assert await scout_all([]) == []"],
       ["异步函数", "import inspect\nassert inspect.iscoroutinefunction(scout_all)"]
     ]
   },
