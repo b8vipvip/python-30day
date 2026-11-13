@@ -8,7 +8,10 @@
   <title>Python Quest · 30 天冒险学院</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="stylesheet" href="./styles.css">
+  <script src="./config.js" defer></script>
+  <script src="./challenges.js" defer></script>
   <script src="./app.js" defer></script>
+  <script type="module" src="./platform.js"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -24,6 +27,7 @@
       </nav>
       <div class="top-actions">
         <div class="mini-xp"><span class="sparkle">✦</span><strong id="topXp">0 XP</strong></div>
+        <button class="cloud-action" id="cloudButton" aria-label="登录并同步进度">☁ <span id="cloudStatus">本地存档</span></button>
         <button class="icon-button" id="themeToggle" aria-label="切换主题" title="切换主题">☾</button>
         <button class="avatar-button" id="profileButton" aria-label="学习者资料">🧑‍🚀</button>
       </div>
@@ -106,6 +110,11 @@
             <p class="trophy-hint">完成任务、坚持练习，收集你的专属徽章。</p>
           </section>
 
+          <section class="side-card leaderboard-card" id="leaderboard">
+            <div class="side-card-heading"><h3>🏆 冒险排行榜</h3><button class="text-button" id="refreshLeaderboard">刷新 ↻</button></div>
+            <p class="leaderboard-description">按照学习记录排名；浏览器判题不用于防作弊比赛。</p>
+            <div id="leaderboardList" class="leaderboard-list"><div class="empty-state">连接账号后查看真实玩家排名</div></div>
+          </section>
           <section class="side-card focus-card">
             <div class="side-card-heading"><h3>专注能量站</h3><span class="focus-leaf">🍃</span></div>
             <p>给自己 25 分钟，只专注一件事。</p>
@@ -138,6 +147,34 @@
       <div class="lesson-content" id="lessonContent"></div>
       <div class="lesson-footer"><span id="lessonFooterHint">完成学习、实战和答题即可通关</span><button class="button button-primary" id="lessonNextButton">开始学习 <span>→</span></button></div>
     </section>
+  </div>
+  <div class="modal cloud-modal" id="cloudModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-cloud></div>
+    <section class="cloud-dialog" role="dialog" aria-modal="true" aria-labelledby="cloudTitle">
+      <div class="cloud-header"><div><div class="eyebrow eyebrow-dark">CLOUD SAVE</div><h2 id="cloudTitle">☁ 冒险存档云</h2><p>邮箱登录 · 多设备同步 · 查看真实玩家</p></div><button class="close-button" id="closeCloud" aria-label="关闭同步窗口">×</button></div>
+      <div id="cloudAccountInfo" class="cloud-account-info"></div>
+      <form id="authForm" class="auth-form">
+        <div class="auth-switch"><button type="button" class="active" data-auth-mode="signin">登录</button><button type="button" data-auth-mode="signup">注册</button></div>
+        <label>邮箱地址<input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com" required></label>
+        <label>密码<input type="password" id="authPassword" autocomplete="current-password" placeholder="至少 8 个字符" required minlength="8"></label>
+        <button type="submit" class="button button-primary button-full" id="authSubmit">登录并同步 ☁</button>
+      </form>
+      <div id="cloudLoggedIn" class="cloud-logged-in" hidden>
+        <label>排行榜昵称<input id="displayNameInput" maxlength="24" placeholder="冒险者昵称"></label>
+        <div class="cloud-buttons"><button class="button button-primary" id="saveDisplayName">保存昵称</button><button class="button button-soft" id="syncNow">立即同步 ↻</button><button class="button button-ghost logout-button" id="logoutButton">退出登录</button></div>
+      </div>
+      <div class="cloud-note" id="cloudNote">未配置云服务时，所有学习内容仍可在本地使用。云端不存储你的代码。</div>
+    </section>
+  </div>
+
+  <div class="tutor-dock" id="tutorDock">
+    <section class="tutor-panel" id="tutorPanel" aria-label="Python 互动助教" hidden>
+      <div class="tutor-heading"><div><strong>🤖 Py 小导师</strong><small id="tutorMode">本地提示模式</small></div><button class="close-button" id="closeTutor" aria-label="关闭助教">×</button></div>
+      <div class="tutor-messages" id="tutorMessages" aria-live="polite"><div class="tutor-message assistant">嗨！我会陪你拆解难题。选一个关卡，或告诉我你卡在哪里。💜</div></div>
+      <form id="tutorForm" class="tutor-form"><textarea id="tutorQuestion" rows="2" maxlength="1200" placeholder="问问 Py：这个 Bug 为什么出现？" required></textarea><button type="submit" id="tutorSubmit" aria-label="发送提问">➤</button></form>
+      <p class="tutor-disclaimer" id="tutorDisclaimer">未连接云端时只提供课程提示，不会调用 AI 模型。</p>
+    </section>
+    <button class="tutor-launcher" id="openTutor" aria-label="打开 AI 学习助教">🤖 <span>问问 Py</span></button>
   </div>
   <div class="toast-region" id="toastRegion" aria-live="polite"></div>
 </body>
