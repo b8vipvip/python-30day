@@ -270,7 +270,7 @@ function renderLesson() {
       '</div><div class="quiz-feedback ' + (quizPassed ? "show" : "") + '">' + (quizPassed ? "🎉 答对啦！" + escapeHtml(day.explain) : "选一个你认为正确的答案，再点击下方“检查答案”。") + '</div></div>' +
       (!practiceDone ? '<div class="deliverable" style="margin-top:12px">🧩 记得完成实战任务并在上一页打卡，才能领取本关奖励。</div>' : '');
     document.getElementById("lessonFooterHint").textContent = quizPassed ? (completed ? "已通关，可以继续复习或挑战下一关" : (practiceDone ? "知识验证通过，准备领取奖励" : "答题通过！再完成实战任务即可通关")) : "选好答案后检查，答对即可通过知识验证";
-    document.getElementById("lessonNextButton").innerHTML = quizPassed ? (completed ? '完成复习 <span>✓</span>' : '领取通关奖励 <span>✦</span>') : '检查答案 <span>→</span>';
+    document.getElementById("lessonNextButton").innerHTML = quizPassed ? (completed ? '完成复习 <span>✓</span>' : (practiceDone ? '领取通关奖励 <span>✦</span>' : '完成实战任务 <span>→</span>')) : '检查答案 <span>→</span>';
   }
 }
 function completeDay() {
@@ -309,6 +309,7 @@ function checkAnswer() {
 function nextLessonAction() {
   if (activeTab === "learn") switchTab("mission");
   else if (activeTab === "mission") switchTab("quiz");
+  else if (quizPassed && !practiceDone) switchTab("mission");
   else if (quizPassed && practiceDone) {
     const next = days.find(function (day) { return day.day > activeDay.day && !state.completed.includes(day.day); });
     if (next) openLesson(next.day);
