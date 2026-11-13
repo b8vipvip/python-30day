@@ -99,6 +99,7 @@ function loadState() {
 }
 function saveState() {
   localStorage.setItem(storageKey, JSON.stringify(state));
+  window.dispatchEvent(new CustomEvent("quest:progress-change"));
 }
 function dateKey(date) {
   return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
@@ -279,9 +280,9 @@ function renderLesson() {
     content.innerHTML = '<div class="mission-card"><span class="quiz-label">YOUR MISSION</span><h3>' + escapeHtml(day.missionTitle) + '</h3><p>' + escapeHtml(day.mission) + '</p><h3 class="content-heading">任务步骤</h3><ul>' +
       day.steps.map(function (step) { return '<li>' + escapeHtml(step) + '</li>'; }).join("") +
       '</ul><div class="deliverable"><strong>🎁 通关交付物：</strong>' + escapeHtml(day.deliverable) + '</div></div>' +
-      '<label class="practice-check"><input type="checkbox" id="practiceCheckbox" ' + (practiceDone ? "checked" : "") + '> 我已经亲手完成实战任务（不是只看懂代码）</label>' +
-      '<p class="trophy-hint">小提示：可以使用自己的编辑器完成任务。这里的勾选是你的学习承诺。</p>';
-    document.getElementById("lessonFooterHint").textContent = practiceDone ? "实战已打卡，接下来验证知识掌握情况" : "完成实战后勾选，再去闯关答题";
+      '<div id="codingWorkbench" class="coding-workbench"><div class="empty-state">⏳ 正在加载 Python 编程训练场...</div></div>' +
+      '<p class="trophy-hint">通过浏览器 Python 自动测试，才会完成本关编程打卡。正式工程项目仍应在本地 IDE 实际实现。</p>';
+    document.getElementById("lessonFooterHint").textContent = practiceDone ? "编程挑战已通过，接下来完成知识测验" : "运行代码并通过所有自动测试，才能完成本关实战";
     document.getElementById("lessonNextButton").innerHTML = '去闯关答题 <span>→</span>';
   } else {
     const letters = ["A", "B", "C", "D"];
@@ -294,10 +295,13 @@ function renderLesson() {
         return '<button class="' + cls + '" data-answer="' + index + '"><span class="option-letter">' + letters[index] + '</span>' + escapeHtml(option) + '</button>';
       }).join("") +
       '</div><div class="quiz-feedback ' + (quizPassed ? "show" : "") + '">' + (quizPassed ? "🎉 答对啦！" + escapeHtml(day.explain) : "选一个你认为正确的答案，再点击下方“检查答案”。") + '</div></div>' +
-      (!practiceDone ? '<div class="deliverable" style="margin-top:12px">🧩 记得完成实战任务并在上一页打卡，才能领取本关奖励。</div>' : '');
+      (!practiceDone ? '<div class="deliverable" style="margin-top:12px">🧩 记得回到实战任务，提交 Python 代码通过自动测试，才能领取本关奖励。</div>' : '');
     document.getElementById("lessonFooterHint").textContent = quizPassed ? (completed ? "已通关，可以继续复习或挑战下一关" : (practiceDone ? "知识验证通过，准备领取奖励" : "答题通过！再完成实战任务即可通关")) : "选好答案后检查，答对即可通过知识验证";
     document.getElementById("lessonNextButton").innerHTML = quizPassed ? (completed ? '完成复习 <span>✓</span>' : (practiceDone ? '领取通关奖励 <span>✦</span>' : '完成实战任务 <span>→</span>')) : '检查答案 <span>→</span>';
   }
+  window.dispatchEvent(new CustomEvent("quest:lesson-render", {
+    detail: { day: day.day, tab: activeTab }
+  }));
 }
 function completeDay() {
   if (!activeDay) return;
@@ -433,7 +437,7 @@ function bindEvents() {
     renderApp();
   });
   document.getElementById("profileButton").addEventListener("click", function () {
-    showToast("你好，冒险者！你的学习进度保存在当前浏览器中。");
+    window.dispatchEvent(new CustomEvent("quest:open-cloud"));
   });
   document.getElementById("exportButton").addEventListener("click", exportProgress);
   document.getElementById("closeLesson").addEventListener("click", closeLesson);
@@ -458,19 +462,49 @@ function bindEvents() {
       } else showToast("当前浏览器不支持自动复制，请手动选择代码。");
     }
   });
-  document.getElementById("lessonContent").addEventListener("change", function (event) {
-    if (event.target.id === "practiceCheckbox") {
-      practiceDone = event.target.checked;
-      state.practice[activeDay.day] = practiceDone;
-      saveState();
-      renderLesson();
-      if (practiceDone) showToast("实战打卡已记录，去答题领取 XP 吧！");
-    }
-  });
+
   document.addEventListener("keydown", function (event) {
     if (event.key === "Escape") closeLesson();
   });
 }
+
+/* Integration boundary for optional editor, AI assistant and cloud sync.
+ * Never accept remote XP: always derive from the merged completed-day set.
+ */
+window.PythonQuest = {
+  getState: () => JSON.parse(JSON.stringify(state)),
+  activeDay: () => activeDay ? activeDay.day : null,
+  getDays: () => days.map(day => ({day:day.day,title:day.title,summary:day.summary,zone:day.zone})),
+  openLesson: dayNumber => openLesson(dayNumber),
+  toast: message => showToast(message),
+  setPracticePassed: (dayNumber) => {
+    const num = Number(dayNumber);
+    if (!Number.isInteger(num) || num < 1 || num > 30) return;
+    state.practice[num] = true;
+    saveState();
+    if (activeDay && activeDay.day === num) {
+      practiceDone = true;
+      if (quizPassed) completeDay();
+      else renderLesson();
+    }
+  },
+  mergeCloudProgress: (remote) => {
+    const remoteDays = Array.isArray(remote.completed_days) ? remote.completed_days : [];
+    const merged = [...new Set([...state.completed,...remoteDays].filter(x => Number.isInteger(x) && x >= 1 && x <= 30))].sort((a,b) => a-b);
+    state.completed = merged;
+    state.xp = merged.reduce((total, id) => total + (days[id-1].boss ? 100 : 50), 0);
+    if (remote.practice && typeof remote.practice === "object" && !Array.isArray(remote.practice)) {
+      for (const [key,value] of Object.entries(remote.practice)) {
+        if (Number(key) >= 1 && Number(key) <= 30 && value === true) state.practice[key] = true;
+      }
+    }
+    state.streak = Math.max(state.streak || 0, Number(remote.streak) || 0);
+    if (typeof remote.last_active_date === "string" && remote.last_active_date > state.lastActiveDate) state.lastActiveDate = remote.last_active_date;
+    localStorage.setItem(storageKey, JSON.stringify(state));
+    renderApp();
+    window.dispatchEvent(new CustomEvent("quest:progress-restored"));
+  }
+};
 touchStreak();
 renderApp();
 initTimer();
