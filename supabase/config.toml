@@ -1,0 +1,5 @@
+# The Edge Function verifies a user session with Supabase Auth itself.
+# Disable the legacy gateway JWT check because publishable keys are not JWTs.
+# Requests are still rejected unless Authorization carries a verified user JWT.
+[functions.ai-tutor]
+verify_jwt = false
