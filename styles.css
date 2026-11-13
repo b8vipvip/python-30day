@@ -322,3 +322,10 @@ body.dark .icon-button { background: #302d42; border-color: #45405c; color: #f5e
   .modal { padding: 8px; align-items: flex-end; }.lesson-dialog { max-height: 94vh; border-radius: 22px 22px 14px 14px; }.lesson-topbar { padding: 15px 17px 0; }.lesson-heading { padding: 12px 17px; }.lesson-heading h2 { font-size: 18px; }.lesson-meta { padding: 0 17px 12px; }.lesson-tabs { padding: 0 10px; justify-content: space-around; }.lesson-tab { padding: 11px 7px; font-size: 9px; }.lesson-content { padding: 16px 17px; min-height: 250px; }.lesson-footer { padding: 12px 17px; }.lesson-footer span { max-width: 150px; line-height: 1.5; }.objective-list { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { *, *:before, *:after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+
+.resource-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.resource-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid #e9e5f4; border-radius: 9px; background: #fbfaff; color: #7063c5; font-size: 9px; font-weight: 900; transition: transform .16s, border .16s; }
+.resource-link:hover { transform: translateY(-2px); border-color: #bcb2f3; }
+.resource-link span { color: #a69bdc; }
+body.dark .resource-link { background: #34304b; border-color: #4a4565; color: #c4baff; }
