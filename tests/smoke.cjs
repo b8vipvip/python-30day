@@ -42,7 +42,7 @@ rows=json.load(sys.stdin)
 for row in rows:
     ast.parse(row["starter"], filename=f'Day{row["day"]}-starter.py')
     for name, test in row["tests"]:
-        ast.parse("async def check():\\n" + textwrap.indent(test, "    "))
+        ast.parse("async def check():\n" + textwrap.indent(test, "    "))
 print("Python syntax validated for 30 starters and " + str(sum(len(c["tests"]) for c in rows)) + " assertions")
 `;
 const check = spawnSync("python3", ["-c", py], {
