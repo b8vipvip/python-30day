@@ -32,8 +32,6 @@ jobs:
           test "$(grep -cE '^  \[[0-9]+,' app.js)" -eq 30
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
