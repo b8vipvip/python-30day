@@ -7,6 +7,30 @@ const zones = [
   { id: "ship", name: "交付者群岛", subtitle: "容器化、代码评估，完成你的工程作品", emoji: "🚀", symbol: "🪐", range: [22, 30], theme: "zone-ship" }
 ];
 
+const resourceMap = {
+  forest: [
+    { label: "Python 官方教程", url: "https://docs.python.org/3/tutorial/" },
+    { label: "内置数据类型", url: "https://docs.python.org/3/library/stdtypes.html" },
+    { label: "异常与错误", url: "https://docs.python.org/3/tutorial/errors.html" }
+  ],
+  castle: [
+    { label: "FastAPI 官方教程", url: "https://fastapi.tiangolo.com/tutorial/" },
+    { label: "SQLAlchemy 2.x", url: "https://docs.sqlalchemy.org/en/20/" },
+    { label: "asyncio 官方文档", url: "https://docs.python.org/3/library/asyncio.html" }
+  ],
+  debug: [
+    { label: "Pytest 文档", url: "https://docs.pytest.org/en/stable/" },
+    { label: "Python Debug 与性能分析", url: "https://docs.python.org/3/library/debug.html" },
+    { label: "OWASP Top 10", url: "https://owasp.org/www-project-top-ten/" }
+  ],
+  ship: [
+    { label: "Docker 官方文档", url: "https://docs.docker.com/" },
+    { label: "GitHub Actions 文档", url: "https://docs.github.com/en/actions" },
+    { label: "Ruff 代码质量工具", url: "https://docs.astral.sh/ruff/" },
+    { label: "Mypy 类型检查", url: "https://mypy.readthedocs.io/en/stable/" }
+  ]
+};
+
 const rawDays = [
   [1,"forest","唤醒 Python 精灵","写下第一行代码，点亮冒险地图。","🐍",35,"新手","认识 Python 的运行方式，掌握变量、基础类型和 print，让程序第一次回应你。",["配置 Python 3 环境并运行脚本","理解变量、字符串、整数和布尔值","使用 print() 输出格式化结果"],["变量与赋值","int / float / str / bool","print() 与 f-string"],"制作一张冒险者名片","创建一个 profile.py，输出你的昵称、职业、等级和一句冒险宣言。",["创建 profile.py 文件","用变量保存昵称、职业和等级","使用 f-string 输出整齐的名片"],"终端中能看到一张包含 4 项信息的名片。","name = 'Code Ranger'\\nlevel = 1\\nrole = 'Python Explorer'\\nprint(f'{name} · Lv.{level}')\\nprint(f'职业：{role}')","下面哪一种写法可以把变量 name 的值嵌入字符串？",["'Hello, {name}'","f'Hello, {name}'","'Hello' + {name}","print(name = 'Hello')"],1,"f-string 在字符串前加 f，并用花括号包裹变量或表达式。",false],
   [2,"forest","数据背包整理术","列表、字典和集合，装下你的冒险物资。","🎒",40,"入门","Python 容器能帮你组织成组的数据。今天学习何时使用 list、tuple、dict 和 set。",["创建和修改 list","用 dict 表示结构化对象","理解 set 去重和 tuple 不可变"],["list 列表","dict 字典","set 集合与 tuple 元组"],"整理一份装备清单","把装备保存为列表，把角色属性保存为字典，并去掉重复的掉落物。",["创建至少 4 项装备的列表","用字典记录角色名、生命值和职业","使用 set 去除重复道具"],"输出去重后的装备清单和角色信息。","items = ['键盘', '药水', '地图', '药水']\\nunique_items = list(set(items))\\nhero = {'name': 'Py', 'hp': 100}\\nprint(unique_items)\\nprint(hero['hp'])","如果要通过键 'hp' 快速读取角色生命值，最合适的数据结构是？",["list","tuple","dict","set"],2,"dict 是键值映射，适合通过明确的键读取结构化属性。",false],
@@ -246,6 +270,8 @@ function renderLesson() {
       day.goals.map(function (goal) { return '<div class="objective-item"><span>✓</span>' + escapeHtml(goal) + '</div>'; }).join("") +
       '</div><h3 class="content-heading">🧠 关键知识卡</h3><div class="concept-chips">' +
       day.concepts.map(function (concept) { return '<span class="concept-chip">' + escapeHtml(concept) + '</span>'; }).join("") +
+      '</div><h3 class="content-heading">📚 官方资料补给站</h3><div class="resource-list">' +
+      resourceMap[day.zone].map(function (resource) { return '<a class="resource-link" href="' + resource.url + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(resource.label) + '<span>↗</span></a>'; }).join("") +
       '</div><h3 class="content-heading">💻 代码观察站</h3><div class="code-window"><div class="code-window-head"><span><span class="code-dots"><i></i><i></i><i></i></span>　example.py</span><button class="copy-code" id="copyCode">复制代码 ↗</button></div><pre><code id="lessonCode">' + escapeHtml(day.code) + '</code></pre></div>';
     document.getElementById("lessonFooterHint").textContent = "读完知识卡，去实战任务里动手试试";
     document.getElementById("lessonNextButton").innerHTML = '去做实战任务 <span>→</span>';
